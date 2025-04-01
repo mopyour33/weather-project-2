@@ -1,6 +1,6 @@
 //1~6까지 내 스스로 개발(시작)
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import WeatherButton from './component/WeatherButton';
@@ -26,12 +26,23 @@ function App() {
     setCity(newValue);
   };
 
-  const getClickLocation = () => {
+  //현재 나의 위치의 위도 경도를 받아오는 함수
+  const getCurrentLocation = useCallback(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      let lat = position.coords.latitude;
+      let lon =position.coords.longitude;
+      console.log("현재위치", lat, lon);
+
+      getCurrentLocationWeather(lat, lon, apiKey);
+    });
+  },[]);
+
+  const getClickLocation = useCallback(() => {
     console.log("city :", city);
 
     city==="Current Location" ? getCurrentLocation() : getClickLocationWeather(city, apiKey);
     //
-   }
+   },[city, getCurrentLocation]);
 
   const getClickLocationWeather = async(city, apiKey) => {
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
@@ -45,17 +56,6 @@ function App() {
     setWeather(data);
 
   }
-
-  //현재 나의 위치의 위도 경도를 받아오는 함수
-  const getCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      let lat = position.coords.latitude;
-      let lon =position.coords.longitude;
-      console.log("현재위치", lat, lon);
-
-      getCurrentLocationWeather(lat, lon, apiKey);
-    });
-  };
 
   //Make a Get request
   const getCurrentLocationWeather = async(lat, lon, apiKey) => {
@@ -87,11 +87,11 @@ function App() {
 
   useEffect(() => {
     getCurrentLocation();
-  },[]);
+  },[getCurrentLocation]);
 
   useEffect(() => {
     getClickLocation();
-  },[city]);
+  },[city, getClickLocation]);
   //
 
   return (
