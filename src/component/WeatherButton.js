@@ -5,7 +5,7 @@ const WeatherButton = ({cities, setCity, buttonColor, colorChange}) => {
   //console.log("buttonColor", buttonColor);
 
   return (
-    <div>
+    <div className="weather-button">
       {cities.map((item,index)=>(
         <Button variant={buttonColor?.[index]} key={(index)} onClick={() => {
           setCity(item);

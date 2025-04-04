@@ -19,3 +19,34 @@ body{
   border-radius: 30px;
   background-color: aqua;
 }
+
+/* 버튼 묶음 스타일 (기본: 가로 나열) */
+.weather-button {
+  display: flex;
+  flex-direction: row;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-wrap: wrap; /* 줄바꿈 허용 */
+  justify-content: center; /* 가로 가운데 정렬 */
+}
+
+/* 버튼 개별 스타일 */
+.weather-button button {
+  margin: 5px;
+  min-width: 120px;
+}
+
+@media (max-width: 768px) {
+  .weather-button {
+    flex-direction: column;
+    align-items: center;
+    white-space: normal;
+  }
+
+  .weather-button button {
+    width: 80%;           /* 반응형 너비 */
+    max-width: 250px;
+    text-align: center;
+  }
+}
