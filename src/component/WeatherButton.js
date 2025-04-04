@@ -10,10 +10,10 @@ const WeatherButton = ({onValueChange}) => {
   };
 
   return (
-    <div>
+    <div className="weather-button">
       <Button variant="warning" onClick={() => handleInputChange("Current Location")}>Current Location</Button>
-      <Button variant="warning" onClick={() => handleInputChange("Paris")}>PARIS</Button>
-      <Button variant="warning" onClick={() => handleInputChange("NEW YORK")}>NEW YORK</Button>
+      <Button variant="warning" onClick={() => handleInputChange("Paris")}>Paris</Button>
+      <Button variant="warning" onClick={() => handleInputChange("NEW YORK")}>New York</Button>
     </div>
   )
 }
