@@ -1,10 +1,9 @@
-//1~6까지 내 스스로 개발(시작)
-
 import { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import WeatherButton from './component/WeatherButton';
 import WeatherBox from './component/WeatherBox';
+import ClipLoader from "react-spinners/ClipLoader";
 
 //1. app이 실행되자마자 현재위치기반의 날씨가 보인다.
 //2. 날씨 정보에는 도시, 섭씨, 화씨, 날씨 상태정보가 보인다.
@@ -18,96 +17,110 @@ const apiKey = "c4dcd132109d1f8c94d8d25e7a55a0ff";
 
 function App() {
 
+  //자식 -> 부모 값 전달을 위해 모든 함수, 변수는 다 App이 알고 있어야함. 자식 -> 부모 전달을 위해 useState의 setValue 함수를 자식에게 내릴것(중요!!)
+  //자식이 setValue함수를 받으면 값을 넣으면 됨
   const [weather, setWeather] = useState(null);
   const [city, setCity] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [buttonColor, setButtonColor] = useState(["warning","warning", "warning","warning","warning"]);
+  const cities = ['Current Location', 'paris','new york','tokyo','seoul'];
 
-
-  const handleValueChange = (newValue) => {
-    setCity(newValue);
-  };
 
   //현재 나의 위치의 위도 경도를 받아오는 함수
   const getCurrentLocation = useCallback(() => {
     navigator.geolocation.getCurrentPosition((position) => {
       let lat = position.coords.latitude;
       let lon =position.coords.longitude;
-      console.log("현재위치", lat, lon);
+      //console.log("현재위치", lat, lon);
 
       getCurrentLocationWeather(lat, lon, apiKey);
     });
   },[]);
 
-  const getClickLocation = useCallback(() => {
-    console.log("city :", city);
+  // 이미 setCity를 통해 city 값이 바뀐뒤, useEffect를 통해서 호출되었기 때문에 async를 생각할 필요가 없음(중요!!)
+  const getWeatherByCity = useCallback(async(apiKey) => {
+    let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
 
-    city==="Current Location" ? getCurrentLocation() : getClickLocationWeather(city, apiKey);
-    //
-   },[city, getCurrentLocation]);
+    //console.log("ClickapiUrl:",apiUrl);
+    setLoading(true);
+    try{
+      let response = await fetch(apiUrl);
+      let data = await response.json();
+      setLoading(false);
+      //console.log("city data:", data);
+      setWeather(data);
+    }catch{
+      console.error("error발생:Network response was not ok");
+    }finally{
+      setLoading(false);
+    };
+  },[city]);
 
-  const getClickLocationWeather = async(city, apiKey) => {
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
 
-    console.log("ClickapiUrl:",apiUrl);
+
+    //Make a Get request
+    const getCurrentLocationWeather = async(lat, lon, apiKey) => {
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${apiKey}`;  
+      
+      //api call을 하려면 response와 await를 사용 -> response를 json() 형태로 받으면 된다., await 사용 시 비동기적 호출이므로 async를 써줘야함
+      //console.log("apiURL :", apiUrl);
     
-    //api call을 하려면 response와 await를 사용 -> response를 json() 형태로 받으면 된다., await 사용 시 비동기적 호출이므로 async를 써줘야함
-    let response = await fetch(apiUrl);
-    let data = await response.json();
-    console.log("city data:", data);
-    setWeather(data);
+      setLoading(true);
+      //console.log("data(real):", data);
+      try{
+        let response = await fetch(apiUrl);
+        let data = await response.json();
+        setLoading(false);
+        //console.log("city data:", data);
+        setWeather(data);
+      }catch{
+        console.error("error발생:Network response was not ok");
+      }finally{
+        setLoading(false);
+      };
+    };
 
-  }
+  const colorChange = (index) => {
+    
+    //console.log("index:??", index);
+    let buttonColor = ["warning","warning", "warning","warning","warning"];
+    buttonColor[index] = "dark";
+    //console.log("buttonColor:", buttonColor);
+    setButtonColor(buttonColor);
 
-  //Make a Get request
-  const getCurrentLocationWeather = async(lat, lon, apiKey) => {
-  const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${apiKey}`;  
-  
-  //api call을 하려면 response와 await를 사용 -> response를 json() 형태로 받으면 된다., await 사용 시 비동기적 호출이므로 async를 써줘야함
-  console.log("apiURL :", apiUrl);
-  let response = await fetch(apiUrl);
-  
-  let data = await response.json();
-  setWeather(data);
-  console.log("data(real):", data);
-
-  
-  // fetch(apiUrl)
-  //   .then(response => {
-  //     if(!response.ok) {
-  //       throw new Error('Network response was not ok');
-  //     }
-  //     return response.json();
-  //   })
-  //   .then(data => {
-  //     console.log(data);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error', error);
-  //   });
-  }
+  };
 
   useEffect(() => {
-    getCurrentLocation();
-  },[getCurrentLocation]);
-
-  useEffect(() => {
-    getClickLocation();
-  },[city, getClickLocation]);
-  //
+    if(city==='' || city ==='Current Location'){
+      //console.log("city:", city)
+      getCurrentLocation();
+    }else{
+      getWeatherByCity();
+    }    
+  },[city,getCurrentLocation, getWeatherByCity]);
 
   return (
     <div>
-      <div className="container">
-        <WeatherBox weather={weather}/>
-        <WeatherButton onValueChange={handleValueChange}/>
-      </div>
+      {loading? (
+        <div className="container">
+          <ClipLoader color="#f88c6b" loading={loading} size={150}/>
+        </div>
+      ) : (
+        <div className="container">
+          <WeatherBox weather={weather}/>
+          <WeatherButton cities ={cities} setCity={setCity} buttonColor={buttonColor} colorChange={colorChange}/>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
-//1~6까지 내 스스로 개발(끝)
 
-// import { useEffect, useState } from 'react';
+
+//1~6까지 내 스스로 개발(시작)
+
+// import { useCallback, useEffect, useState } from 'react';
 // import './App.css';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import WeatherButton from './component/WeatherButton';
@@ -125,18 +138,38 @@ export default App;
 
 // function App() {
 
-//   //자식 -> 부모 값 전달을 위해 모든 함수, 변수는 다 App이 알고 있어야함. 자식 -> 부모 전달을 위해 useState의 setValue 함수를 자식에게 내릴것(중요!!)
-//   //자식이 setValue함수를 받으면 값을 넣으면 됨
 //   const [weather, setWeather] = useState(null);
 //   const [city, setCity] = useState("");
-//   const cities = ['paris','new york','tokyo','seoul'];
 
 
-//   // 이미 setCity를 통해 city 값이 바뀐뒤, useEffect를 통해서 호출되었기 때문에 async를 생각할 필요가 없음(중요!!)
-//   const getWeatherByCity = async(apiKey) => {
-//     let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
+//   const handleValueChange = (newValue) => {
+//     setCity(newValue);
+//   };
 
-//     //console.log("ClickapiUrl:",apiUrl);
+//   //현재 나의 위치의 위도 경도를 받아오는 함수
+//   const getCurrentLocation = useCallback(() => {
+//     navigator.geolocation.getCurrentPosition((position) => {
+//       let lat = position.coords.latitude;
+//       let lon =position.coords.longitude;
+//       console.log("현재위치", lat, lon);
+
+//       getCurrentLocationWeather(lat, lon, apiKey);
+//     });
+//   },[]);
+
+//   const getClickLocation = useCallback(() => {
+//     console.log("city :", city);
+
+//     city==="Current Location" ? getCurrentLocation() : getClickLocationWeather(city, apiKey);
+//     //
+//    },[city, getCurrentLocation]);
+
+//   const getClickLocationWeather = async(city, apiKey) => {
+//     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
+
+//     console.log("ClickapiUrl:",apiUrl);
+    
+//     //api call을 하려면 response와 await를 사용 -> response를 json() 형태로 받으면 된다., await 사용 시 비동기적 호출이므로 async를 써줘야함
 //     let response = await fetch(apiUrl);
 //     let data = await response.json();
 //     console.log("city data:", data);
@@ -144,47 +177,52 @@ export default App;
 
 //   }
 
-//   //현재 나의 위치의 위도 경도를 받아오는 함수
-//   const getCurrentLocation = () => {
-//     navigator.geolocation.getCurrentPosition((position) => {
-//       let lat = position.coords.latitude;
-//       let lon =position.coords.longitude;
-//       //console.log("현재위치", lat, lon);
-
-//       getCurrentLocationWeather(lat, lon, apiKey);
-//     });
-//   };
-
 //   //Make a Get request
 //   const getCurrentLocationWeather = async(lat, lon, apiKey) => {
 //   const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${apiKey}`;  
   
 //   //api call을 하려면 response와 await를 사용 -> response를 json() 형태로 받으면 된다., await 사용 시 비동기적 호출이므로 async를 써줘야함
-//   //console.log("apiURL :", apiUrl);
+//   console.log("apiURL :", apiUrl);
 //   let response = await fetch(apiUrl);
   
 //   let data = await response.json();
 //   setWeather(data);
 //   console.log("data(real):", data);
 
+  
+//   // fetch(apiUrl)
+//   //   .then(response => {
+//   //     if(!response.ok) {
+//   //       throw new Error('Network response was not ok');
+//   //     }
+//   //     return response.json();
+//   //   })
+//   //   .then(data => {
+//   //     console.log(data);
+//   //   })
+//   //   .catch(error => {
+//   //     console.error('Error', error);
+//   //   });
 //   }
 
 //   useEffect(() => {
-//     if(city===''){
-//       getCurrentLocation();
-//     }else{
-//       getWeatherByCity();
-//     }    
-//   },[city]);
+//     getCurrentLocation();
+//   },[getCurrentLocation]);
+
+//   useEffect(() => {
+//     getClickLocation();
+//   },[city, getClickLocation]);
+//   //
 
 //   return (
 //     <div>
 //       <div className="container">
 //         <WeatherBox weather={weather}/>
-//         <WeatherButton cities ={cities} setCity={setCity}/>
+//         <WeatherButton onValueChange={handleValueChange}/>
 //       </div>
 //     </div>
 //   );
 // }
 
 // export default App;
+//1~6까지 내 스스로 개발(끝)

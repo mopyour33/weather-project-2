@@ -1,13 +1,11 @@
-// //1~6까지 내 스스로 개발(시작)
-
 import React from 'react'
 
 const WeatherBox = ({weather}) => {
   const temp = weather?.main?.temp;
   const fah = (temp===null? null : Math.round((weather?.main?.temp * 1.8 + 32)*100)/100);
-  console.log("섭씨:", weather?.main?.temp);
-  console.log("화씨:", fah);
-  console.log("weather:", weather);
+  //console.log("섭씨:", weather?.main?.temp);
+  //console.log("화씨:", fah);
+  //console.log("weather:", weather);
 
 
   return (
@@ -21,7 +19,7 @@ const WeatherBox = ({weather}) => {
 
 export default WeatherBox
 
-//1~6까지 내 스스로 개발(끝)
+// //1~6까지 내 스스로 개발(시작)
 
 // import React from 'react'
 
@@ -43,3 +41,5 @@ export default WeatherBox
 // }
 
 // export default WeatherBox
+
+//1~6까지 내 스스로 개발(끝)
