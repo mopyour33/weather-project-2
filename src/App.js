@@ -23,7 +23,7 @@ function App() {
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [buttonColor, setButtonColor] = useState(["warning","warning", "warning","warning","warning"]);
-  const cities = ['Current Location', 'paris','new york','tokyo','seoul'];
+  const cities = ['Current Location', 'Paris','New York','Tokyo','Seoul'];
 
 
   //현재 나의 위치의 위도 경도를 받아오는 함수
