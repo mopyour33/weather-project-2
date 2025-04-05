@@ -13,7 +13,8 @@ import ClipLoader from "react-spinners/ClipLoader";
 //6. 데이터를 들고오는 동안 로딩 스피너가 돈다.
 
 //Define the API URL
-const apiKey = "c4dcd132109d1f8c94d8d25e7a55a0ff";
+const OPENWHEATER_API_KEY=process.env.REACT_APP_OPENWEATHER_API_KEY;
+const apiKey = OPENWHEATER_API_KEY;
 
 function App() {
 
@@ -31,7 +32,7 @@ function App() {
     navigator.geolocation.getCurrentPosition((position) => {
       let lat = position.coords.latitude;
       let lon =position.coords.longitude;
-      //console.log("현재위치", lat, lon);
+      //console.log("apiKey:", apiKey);
 
       getCurrentLocationWeather(lat, lon, apiKey);
     });
@@ -39,7 +40,7 @@ function App() {
 
   // 이미 setCity를 통해 city 값이 바뀐뒤, useEffect를 통해서 호출되었기 때문에 async를 생각할 필요가 없음(중요!!)
   const getWeatherByCity = useCallback(async(apiKey) => {
-    let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=c4dcd132109d1f8c94d8d25e7a55a0ff&units=metric`;
+    let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${OPENWHEATER_API_KEY}&units=metric`;
 
     //console.log("ClickapiUrl:",apiUrl);
     setLoading(true);
